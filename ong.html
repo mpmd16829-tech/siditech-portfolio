@@ -1,665 +1,564 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SIDITECH — Plateformes M&E pour ONG | Nouakchott</title>
-<meta name="description" content="Plateformes de suivi-évaluation pour ONG en Afrique de l'Ouest. Import KoboToolbox, rapports bailleurs automatiques, dashboards terrain. Prototype gratuit en 48h.">
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<style>
-*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-
-:root {
-  --bg: oklch(98.5% 0.003 250);
-  --fg: oklch(14% 0.01 250);
-  --primary: oklch(50% 0.16 250);
-  --primary-light: oklch(94% 0.04 250);
-  --primary-dark: oklch(38% 0.14 250);
-  --accent: oklch(55% 0.16 155);
-  --accent-light: oklch(93% 0.04 155);
-  --card: oklch(12% 0.015 250);
-  --card-fg: oklch(96% 0.005 250);
-  --muted: oklch(45% 0.01 250);
-  --border: oklch(90% 0.006 250);
-  --ease: cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-html { scroll-behavior: smooth; }
-body {
-  font-family: 'Manrope', system-ui, sans-serif;
-  color: var(--fg);
-  background: var(--bg);
-  line-height: 1.6;
-  font-size: 16px;
-  -webkit-font-smoothing: antialiased;
-}
-
-h1, h2, h3 { font-weight: 800; letter-spacing: -0.03em; line-height: 1.1; }
-.mono { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; }
-
-nav {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 100;
-  padding: 16px 48px;
-  background: oklch(98.5% 0.003 250 / 0.9);
-  backdrop-filter: blur(12px);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.nav-logo { font-weight: 800; font-size: 1.3rem; color: var(--primary-dark); }
-.nav-logo span { color: var(--accent); }
-
-.nav-cta {
-  background: var(--primary);
-  color: white;
-  padding: 10px 24px;
-  border-radius: 8px;
-  font-weight: 700;
-  font-size: 0.85rem;
-  text-decoration: none;
-  transition: transform 150ms var(--ease);
-}
-.nav-cta:hover { transform: translateY(-1px); }
-
-.hero {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding: 140px 48px 80px;
-  max-width: 1280px;
-  margin: 0 auto;
-  position: relative;
-}
-
-.hero-eyebrow {
-  color: var(--primary);
-  margin-bottom: 24px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.hero-eyebrow::before {
-  content: '';
-  width: 32px;
-  height: 2px;
-  background: var(--primary);
-}
-
-.hero h1 {
-  font-size: clamp(2.8rem, 5.5vw, 4.2rem);
-  color: var(--fg);
-  max-width: 16ch;
-  margin-bottom: 24px;
-}
-
-.hero h1 em { font-style: normal; color: var(--primary); }
-
-.hero-sub {
-  font-size: 1.2rem;
-  color: var(--muted);
-  max-width: 55ch;
-  margin-bottom: 40px;
-  line-height: 1.7;
-}
-
-.hero-actions {
-  display: flex;
-  gap: 16px;
-  flex-wrap: wrap;
-  margin-bottom: 64px;
-}
-
-.btn-primary {
-  background: var(--primary);
-  color: white;
-  padding: 16px 32px;
-  border-radius: 10px;
-  font-weight: 700;
-  font-size: 0.95rem;
-  text-decoration: none;
-  transition: transform 150ms var(--ease), box-shadow 200ms;
-  box-shadow: 0 4px 16px oklch(50% 0.16 250 / 0.2);
-}
-.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 28px oklch(50% 0.16 250 / 0.25); }
-
-.btn-wa {
-  background: var(--accent);
-  box-shadow: 0 4px 16px oklch(55% 0.16 155 / 0.2);
-}
-.btn-wa:hover { box-shadow: 0 8px 28px oklch(55% 0.16 155 / 0.25); }
-
-.btn-outline {
-  background: transparent;
-  color: var(--fg);
-  padding: 16px 32px;
-  border-radius: 10px;
-  font-weight: 700;
-  font-size: 0.95rem;
-  text-decoration: none;
-  border: 2px solid var(--border);
-  transition: border-color 150ms;
-}
-.btn-outline:hover { border-color: var(--primary); }
-
-.trust-bar {
-  display: flex;
-  gap: 32px;
-  flex-wrap: wrap;
-  align-items: center;
-}
-
-.trust-item {
-  font-size: 0.85rem;
-  color: var(--muted);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.trust-item::before {
-  content: '✓';
-  color: var(--accent);
-  font-weight: 700;
-}
-
-.problem {
-  padding: 100px 48px;
-  background: var(--card);
-  color: var(--card-fg);
-}
-
-.problem-inner {
-  max-width: 1280px;
-  margin: 0 auto;
-}
-
-.problem .mono { color: oklch(60% 0.1 250); margin-bottom: 16px; }
-
-.problem h2 {
-  font-size: clamp(2rem, 3.5vw, 2.8rem);
-  color: var(--card-fg);
-  margin-bottom: 48px;
-  max-width: 20ch;
-}
-
-.problem-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 32px;
-}
-
-.problem-card {
-  padding: 32px;
-  background: oklch(18% 0.01 250);
-  border-radius: 12px;
-  border: 1px solid oklch(25% 0.01 250);
-}
-
-.problem-card .num {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 2.5rem;
-  font-weight: 700;
-  color: oklch(60% 0.18 25);
-  margin-bottom: 12px;
-}
-
-.problem-card h3 {
-  font-size: 1.1rem;
-  font-weight: 700;
-  margin-bottom: 8px;
-  color: var(--card-fg);
-}
-
-.problem-card p {
-  font-size: 0.9rem;
-  color: oklch(65% 0.01 250);
-  line-height: 1.6;
-}
-
-.solution {
-  padding: 100px 48px;
-  max-width: 1280px;
-  margin: 0 auto;
-}
-
-.solution .mono { color: var(--primary); margin-bottom: 16px; }
-
-.solution h2 {
-  font-size: clamp(2rem, 3.5vw, 2.8rem);
-  margin-bottom: 48px;
-}
-
-.solution-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 24px;
-}
-
-.sol-card {
-  padding: 36px;
-  border-radius: 14px;
-  border: 1px solid var(--border);
-  background: white;
-  transition: transform 200ms var(--ease), box-shadow 200ms;
-}
-
-.sol-card:hover { transform: translateY(-4px); box-shadow: 0 12px 40px oklch(50% 0.02 250 / 0.08); }
-
-.sol-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 10px;
-  display: grid;
-  place-items: center;
-  font-size: 1.4rem;
-  margin-bottom: 20px;
-}
-
-.sol-icon.i1 { background: var(--primary-light); }
-.sol-icon.i2 { background: var(--accent-light); }
-.sol-icon.i3 { background: oklch(93% 0.04 30); }
-.sol-icon.i4 { background: oklch(93% 0.04 310); }
-
-.sol-card h3 { font-size: 1.15rem; font-weight: 700; margin-bottom: 8px; }
-.sol-card p { font-size: 0.9rem; color: var(--muted); line-height: 1.6; }
-
-.comparison {
-  padding: 100px 48px;
-  background: oklch(96% 0.004 250);
-}
-
-.comparison-inner {
-  max-width: 1280px;
-  margin: 0 auto;
-}
-
-.comparison .mono { color: var(--primary); margin-bottom: 16px; }
-
-.comparison h2 {
-  font-size: clamp(2rem, 3.5vw, 2.8rem);
-  margin-bottom: 48px;
-}
-
-.comp-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.95rem;
-}
-
-.comp-table th, .comp-table td {
-  text-align: left;
-  padding: 20px 24px;
-}
-
-.comp-table th {
-  font-weight: 700;
-  border-bottom: 2px solid var(--border);
-  color: var(--fg);
-}
-
-.comp-table td {
-  border-bottom: 1px solid var(--border);
-  color: var(--muted);
-}
-
-.comp-table td:first-child { font-weight: 600; color: var(--fg); }
-.comp-table .win { color: var(--primary); font-weight: 700; }
-
-.pricing {
-  padding: 100px 48px;
-  max-width: 1280px;
-  margin: 0 auto;
-}
-
-.pricing .mono { color: var(--primary); margin-bottom: 16px; }
-
-.pricing h2 {
-  font-size: clamp(2rem, 3.5vw, 2.8rem);
-  margin-bottom: 12px;
-}
-
-.pricing-sub {
-  font-size: 1.05rem;
-  color: var(--muted);
-  margin-bottom: 48px;
-}
-
-.pricing-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 24px;
-}
-
-.price-card {
-  padding: 40px;
-  border-radius: 14px;
-  border: 1px solid var(--border);
-  background: white;
-}
-
-.price-card.featured {
-  background: var(--card);
-  color: var(--card-fg);
-  border: none;
-  position: relative;
-}
-
-.price-card.featured::before {
-  content: 'Recommandé';
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  background: var(--primary);
-  color: white;
-  padding: 4px 12px;
-  border-radius: 6px;
-  font-size: 0.75rem;
-  font-weight: 700;
-}
-
-.price-card h3 { font-size: 1.2rem; font-weight: 700; margin-bottom: 8px; }
-.price-card .amount { font-size: 2.2rem; font-weight: 800; margin-bottom: 4px; }
-.price-card .usd { font-size: 0.9rem; color: var(--muted); margin-bottom: 20px; }
-.price-card.featured .usd { color: oklch(65% 0.01 250); }
-
-.price-card ul {
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.price-card li {
-  font-size: 0.9rem;
-  color: var(--muted);
-  padding-left: 20px;
-  position: relative;
-}
-
-.price-card.featured li { color: oklch(70% 0.01 250); }
-
-.price-card li::before {
-  content: '→';
-  position: absolute;
-  left: 0;
-  color: var(--primary);
-}
-
-.cta {
-  padding: 100px 48px;
-  background: var(--card);
-  text-align: center;
-}
-
-.cta-inner {
-  max-width: 640px;
-  margin: 0 auto;
-}
-
-.cta h2 {
-  font-size: clamp(2rem, 4vw, 3rem);
-  color: var(--card-fg);
-  margin-bottom: 16px;
-}
-
-.cta h2 em { font-style: normal; color: var(--primary); }
-
-.cta p {
-  font-size: 1.1rem;
-  color: oklch(65% 0.01 250);
-  margin-bottom: 40px;
-}
-
-.cta-actions {
-  display: flex;
-  gap: 16px;
-  justify-content: center;
-  flex-wrap: wrap;
-  margin-bottom: 40px;
-}
-
-.cta-contacts {
-  display: flex;
-  gap: 32px;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-
-.cta-contact {
-  font-size: 0.9rem;
-  color: oklch(60% 0.01 250);
-}
-
-.cta-contact strong { color: var(--card-fg); }
-
-footer {
-  padding: 32px 48px;
-  text-align: center;
-  color: var(--muted);
-  font-size: 0.85rem;
-  border-top: 1px solid var(--border);
-}
-
-@media (max-width: 768px) {
-  nav { padding: 14px 20px; }
-  .hero, .solution, .pricing { padding: 80px 20px; }
-  .problem, .comparison, .cta { padding: 80px 20px; }
-  .hero h1 { font-size: 2.2rem; }
-  .hero-actions { flex-direction: column; }
-  .comp-table { font-size: 0.8rem; }
-  .comp-table th, .comp-table td { padding: 12px 8px; }
-  .cta-actions { flex-direction: column; align-items: center; }
-}
-
-.reveal {
-  opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 500ms var(--ease), transform 500ms var(--ease);
-}
-.reveal.visible { opacity: 1; transform: translateY(0); }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SIDITECH — Plateformes M&E pour ONG | Nouakchott</title>
+  <meta name="description" content="Plateformes de suivi-évaluation pour ONG en Afrique de l'Ouest. Import KoboToolbox, rapports bailleurs automatiques, dashboards terrain. Prototype gratuit en 48h.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    /* ---------- Reset & tokens ---------- */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: oklch(98.5% 0.003 250);
+      --fg: oklch(14% 0.01 250);
+      --primary: oklch(50% 0.16 250);
+      --primary-light: oklch(94% 0.04 250);
+      --primary-dark: oklch(38% 0.14 250);
+      --accent: oklch(55% 0.16 155);
+      --accent-light: oklch(93% 0.04 155);
+      --card: oklch(12% 0.015 250);
+      --card-fg: oklch(96% 0.005 250);
+      --muted: oklch(45% 0.01 250);
+      --border: oklch(90% 0.006 250);
+      --ease: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Manrope', system-ui, sans-serif;
+      color: var(--fg);
+      background: var(--bg);
+      line-height: 1.6;
+      font-size: 16px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    h1, h2, h3 { font-weight: 800; letter-spacing: -0.03em; line-height: 1.1; }
+    .mono { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; }
+
+    a { text-decoration: none; color: inherit; }
+
+    /* ---------- Nav ---------- */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      padding: 16px 48px;
+      background: oklch(98.5% 0.003 250 / 0.9);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .nav-logo { font-weight: 800; font-size: 1.3rem; color: var(--primary-dark); }
+    .nav-logo span { color: var(--accent); }
+
+    .nav-cta {
+      background: var(--primary);
+      color: white;
+      padding: 10px 24px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      text-decoration: none;
+      transition: transform 150ms var(--ease);
+    }
+    .nav-cta:hover { transform: translateY(-1px); }
+
+    /* ---------- Hero ---------- */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 140px 48px 80px;
+      max-width: 1280px;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    .hero-eyebrow {
+      color: var(--primary);
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .hero-eyebrow::before {
+      content: '';
+      width: 32px;
+      height: 2px;
+      background: var(--primary);
+    }
+
+    .hero h1 {
+      font-size: clamp(2.8rem, 5.5vw, 4.2rem);
+      color: var(--fg);
+      max-width: 16ch;
+      margin-bottom: 24px;
+    }
+
+    .hero h1 em { font-style: normal; color: var(--primary); }
+
+    .hero-sub {
+      font-size: 1.2rem;
+      color: var(--muted);
+      max-width: 55ch;
+      margin-bottom: 40px;
+      line-height: 1.7;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 64px;
+    }
+
+    /* ---------- Buttons ---------- */
+    .btn-primary, .btn-outline {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 16px 32px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+      box-shadow: 0 4px 16px oklch(50% 0.16 250 / 0.2);
+      transition: transform 150ms var(--ease), box-shadow 200ms;
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 28px oklch(50% 0.16 250 / 0.25); }
+
+    .btn-wa {
+      background: var(--accent);
+      box-shadow: 0 4px 16px oklch(55% 0.16 155 / 0.2);
+    }
+    .btn-wa:hover { box-shadow: 0 8px 28px oklch(55% 0.16 155 / 0.25); }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--fg);
+      border: 2px solid var(--border);
+      transition: border-color 150ms;
+    }
+    .btn-outline:hover { border-color: var(--primary); }
+
+    /* ---------- Trust bar ---------- */
+    .trust-bar { display: flex; gap: 32px; flex-wrap: wrap; align-items: center; }
+
+    .trust-item {
+      font-size: 0.85rem;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .trust-item::before { content: '✓'; color: var(--accent); font-weight: 700; }
+
+    /* ---------- Problem ---------- */
+    .problem { padding: 100px 48px; background: var(--card); color: var(--card-fg); }
+    .problem-inner { max-width: 1280px; margin: 0 auto; }
+    .problem .mono { color: oklch(60% 0.1 250); margin-bottom: 16px; }
+
+    .problem h2 {
+      font-size: clamp(2rem, 3.5vw, 2.8rem);
+      color: var(--card-fg);
+      margin-bottom: 48px;
+      max-width: 20ch;
+    }
+
+    .problem-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 32px;
+    }
+
+    .problem-card {
+      padding: 32px;
+      background: oklch(18% 0.01 250);
+      border-radius: 12px;
+      border: 1px solid oklch(25% 0.01 250);
+    }
+
+    .problem-card .num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: oklch(60% 0.18 25);
+      margin-bottom: 12px;
+    }
+
+    .problem-card h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 8px; color: var(--card-fg); }
+    .problem-card p { font-size: 0.9rem; color: oklch(65% 0.01 250); line-height: 1.6; }
+
+    /* ---------- Solution ---------- */
+    .solution { padding: 100px 48px; max-width: 1280px; margin: 0 auto; }
+    .solution .mono { color: var(--primary); margin-bottom: 16px; }
+    .solution h2 { font-size: clamp(2rem, 3.5vw, 2.8rem); margin-bottom: 48px; }
+
+    .solution-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+    }
+
+    .sol-card {
+      padding: 36px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: white;
+      transition: transform 200ms var(--ease), box-shadow 200ms;
+    }
+
+    .sol-card:hover { transform: translateY(-4px); box-shadow: 0 12px 40px oklch(50% 0.02 250 / 0.08); }
+
+    .sol-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      font-size: 1.4rem;
+      margin-bottom: 20px;
+    }
+
+    .sol-icon.i1 { background: var(--primary-light); }
+    .sol-icon.i2 { background: var(--accent-light); }
+    .sol-icon.i3 { background: oklch(93% 0.04 30); }
+    .sol-icon.i4 { background: oklch(93% 0.04 310); }
+
+    .sol-card h3 { font-size: 1.15rem; font-weight: 700; margin-bottom: 8px; }
+    .sol-card p { font-size: 0.9rem; color: var(--muted); line-height: 1.6; }
+
+    /* ---------- Comparison ---------- */
+    .comparison { padding: 100px 48px; background: oklch(96% 0.004 250); }
+    .comparison-inner { max-width: 1280px; margin: 0 auto; }
+    .comparison .mono { color: var(--primary); margin-bottom: 16px; }
+    .comparison h2 { font-size: clamp(2rem, 3.5vw, 2.8rem); margin-bottom: 48px; }
+
+    .comp-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.95rem;
+    }
+
+    .comp-table th, .comp-table td { text-align: left; padding: 20px 24px; }
+    .comp-table th { font-weight: 700; border-bottom: 2px solid var(--border); color: var(--fg); }
+    .comp-table td { border-bottom: 1px solid var(--border); color: var(--muted); }
+    .comp-table td:first-child { font-weight: 600; color: var(--fg); }
+    .comp-table .win { color: var(--primary); font-weight: 700; }
+
+    /* ---------- Pricing ---------- */
+    .pricing { padding: 100px 48px; max-width: 1280px; margin: 0 auto; }
+    .pricing .mono { color: var(--primary); margin-bottom: 16px; }
+    .pricing h2 { font-size: clamp(2rem, 3.5vw, 2.8rem); margin-bottom: 12px; }
+    .pricing-sub { font-size: 1.05rem; color: var(--muted); margin-bottom: 48px; }
+
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+    }
+
+    .price-card {
+      padding: 40px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: white;
+    }
+
+    .price-card.featured {
+      background: var(--card);
+      color: var(--card-fg);
+      border: none;
+      position: relative;
+    }
+
+    .price-card.featured::before {
+      content: 'Recommandé';
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: var(--primary);
+      color: white;
+      padding: 4px 12px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+
+    .price-card h3 { font-size: 1.2rem; font-weight: 700; margin-bottom: 8px; }
+    .price-card .amount { font-size: 2.2rem; font-weight: 800; margin-bottom: 4px; }
+    .price-card .usd { font-size: 0.9rem; color: var(--muted); margin-bottom: 20px; }
+    .price-card.featured .usd { color: oklch(65% 0.01 250); }
+
+    .price-card ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    .price-card li { font-size: 0.9rem; color: var(--muted); padding-left: 20px; position: relative; }
+    .price-card.featured li { color: oklch(70% 0.01 250); }
+    .price-card li::before { content: '→'; position: absolute; left: 0; color: var(--primary); }
+
+    /* ---------- CTA ---------- */
+    .cta { padding: 100px 48px; background: var(--card); text-align: center; }
+    .cta-inner { max-width: 640px; margin: 0 auto; }
+
+    .cta h2 { font-size: clamp(2rem, 4vw, 3rem); color: var(--card-fg); margin-bottom: 16px; }
+    .cta h2 em { font-style: normal; color: var(--primary); }
+    .cta p { font-size: 1.1rem; color: oklch(65% 0.01 250); margin-bottom: 40px; }
+
+    .cta-actions { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin-bottom: 40px; }
+
+    .cta-contacts { display: flex; gap: 32px; justify-content: center; flex-wrap: wrap; }
+    .cta-contact { font-size: 0.9rem; color: oklch(60% 0.01 250); }
+    .cta-contact strong { color: var(--card-fg); }
+
+    /* ---------- Footer ---------- */
+    footer {
+      padding: 32px 48px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border);
+    }
+
+    /* ---------- Responsive ---------- */
+    @media (max-width: 768px) {
+      nav { padding: 14px 20px; }
+      .hero, .solution, .pricing { padding: 80px 20px; }
+      .problem, .comparison, .cta { padding: 80px 20px; }
+      .hero h1 { font-size: 2.2rem; }
+      .hero-actions { flex-direction: column; }
+      .comp-table { font-size: 0.8rem; }
+      .comp-table th, .comp-table td { padding: 12px 8px; }
+      .cta-actions { flex-direction: column; align-items: center; }
+    }
+
+    /* ---------- Reveal animation ---------- */
+    .reveal {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 500ms var(--ease), transform 500ms var(--ease);
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+  </style>
 </head>
 <body>
 
-<nav>
-  <div class="nav-logo">SIDI<span>TECH</span></div>
-  <a href="https://wa.me/22222149282?text=Bonjour%20SIDITECH%2C%20je%20suis%20int%C3%A9ress%C3%A9%20par%20vos%20solutions%20M%26E%20pour%20ONG." class="nav-cta">Prototype gratuit →</a>
-</nav>
+  <nav>
+    <div class="nav-logo">SIDI<span>TECH</span></div>
+    <a href="https://wa.me/22222149282?text=Bonjour%20SIDITECH%2C%20je%20suis%20int%C3%A9ress%C3%A9%20par%20vos%20solutions%20M%26E%20pour%20ONG." class="nav-cta">Prototype gratuit →</a>
+  </nav>
 
-<section class="hero">
-  <div class="hero-eyebrow mono reveal">Plateformes M&E pour ONG</div>
-  <h1 class="reveal">Vos rapports bailleurs en <em>1 clic</em>, pas en 3 jours</h1>
-  <p class="hero-sub reveal">Import KoboToolbox automatique, dashboards terrain accessibles en 3G, rapports PDF aux formats USAID/UE/AFD. Conçu à Nouakchott pour le Sahel.</p>
-  <div class="hero-actions reveal">
-    <a href="https://wa.me/22222149282?text=Bonjour%20SIDITECH%2C%20je%20voudrais%20un%20prototype%20gratuit%20pour%20notre%20programme." class="btn-primary btn-wa">💬 Demander un prototype gratuit</a>
-    <a href="#pricing" class="btn-outline">Voir les tarifs</a>
-  </div>
-  <div class="trust-bar reveal">
-    <div class="trust-item">25+ applications livrées</div>
-    <div class="trust-item">Prototype en 48h</div>
-    <div class="trust-item">3x moins cher qu'un consultant international</div>
-    <div class="trust-item">Bilingue FR/AR/EN</div>
-  </div>
-</section>
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-eyebrow mono reveal">Plateformes M&E pour ONG</div>
+    <h1 class="reveal">Vos rapports bailleurs en <em>1 clic</em>, pas en 3 jours</h1>
+    <p class="hero-sub reveal">Import KoboToolbox automatique, dashboards terrain accessibles en 3G, rapports PDF aux formats USAID/UE/AFD. Conçu à Nouakchott pour le Sahel.</p>
+    <div class="hero-actions reveal">
+      <a href="https://wa.me/22222149282?text=Bonjour%20SIDITECH%2C%20je%20voudrais%20un%20prototype%20gratuit%20pour%20notre%20programme." class="btn-primary btn-wa">💬 Demander un prototype gratuit</a>
+      <a href="#pricing" class="btn-outline">Voir les tarifs</a>
+    </div>
+    <div class="trust-bar reveal">
+      <div class="trust-item">25+ applications livrées</div>
+      <div class="trust-item">Prototype en 48h</div>
+      <div class="trust-item">3x moins cher qu'un consultant international</div>
+      <div class="trust-item">Bilingue FR/AR/EN</div>
+    </div>
+  </section>
 
-<section class="problem">
-  <div class="problem-inner">
-    <div class="mono reveal">Le problème</div>
-    <h2 class="reveal">Le reporting terrain vous coûte trop de temps et d'argent</h2>
-    <div class="problem-grid">
-      <div class="problem-card reveal">
-        <div class="num">30%</div>
-        <h3>Du temps programme perdu</h3>
-        <p>Vos équipes M&E passent plus de temps à compiler des données qu'à analyser les résultats.</p>
+  <!-- Problème -->
+  <section class="problem">
+    <div class="problem-inner">
+      <div class="mono reveal">Le problème</div>
+      <h2 class="reveal">Le reporting terrain vous coûte trop de temps et d'argent</h2>
+      <div class="problem-grid">
+        <div class="problem-card reveal">
+          <div class="num">30%</div>
+          <h3>Du temps programme perdu</h3>
+          <p>Vos équipes M&E passent plus de temps à compiler des données qu'à analyser les résultats.</p>
+        </div>
+        <div class="problem-card reveal">
+          <div class="num">3x</div>
+          <h3>Ressaisie des données</h3>
+          <p>Papier → Excel → système bailleur. Chaque étape introduit des erreurs et des délais.</p>
+        </div>
+        <div class="problem-card reveal">
+          <div class="num">$500</div>
+          <h3>Par jour de consultant IT</h3>
+          <p>Les prestataires internationaux facturent $400-800/jour pour des outils inadaptés au réseau local.</p>
+        </div>
+        <div class="problem-card reveal">
+          <div class="num">0</div>
+          <h3>Visibilité temps réel</h3>
+          <p>Le siège et les bailleurs n'ont aucune donnée entre deux rapports trimestriels.</p>
+        </div>
       </div>
-      <div class="problem-card reveal">
-        <div class="num">3x</div>
-        <h3>Ressaisie des données</h3>
-        <p>Papier → Excel → système bailleur. Chaque étape introduit des erreurs et des délais.</p>
+    </div>
+  </section>
+
+  <!-- Solution -->
+  <section class="solution">
+    <div class="mono reveal">La solution</div>
+    <h2 class="reveal">Une plateforme pensée pour le terrain</h2>
+    <div class="solution-grid">
+      <div class="sol-card reveal">
+        <div class="sol-icon i1">📥</div>
+        <h3>Import automatique</h3>
+        <p>KoboToolbox, ODK, DHIS2, Excel. Vos données terrain remontent en temps réel. Zéro ressaisie.</p>
       </div>
-      <div class="problem-card reveal">
-        <div class="num">$500</div>
-        <h3>Par jour de consultant IT</h3>
-        <p>Les prestataires internationaux facturent $400-800/jour pour des outils inadaptés au réseau local.</p>
+      <div class="sol-card reveal">
+        <div class="sol-icon i2">📄</div>
+        <h3>Rapports bailleurs en 1 clic</h3>
+        <p>PDF/Excel aux formats exigés: USAID quarterly, UE narrative, AFD cadre logique, Banque Mondiale.</p>
       </div>
-      <div class="problem-card reveal">
-        <div class="num">0</div>
-        <h3>Visibilité temps réel</h3>
-        <p>Le siège et les bailleurs n'ont aucune donnée entre deux rapports trimestriels.</p>
+      <div class="sol-card reveal">
+        <div class="sol-icon i3">📊</div>
+        <h3>Dashboards multi-niveaux</h3>
+        <p>Siège, bureau pays, terrain. KPI, cartographie par zone, alertes. Accessible en 3G sur mobile.</p>
+      </div>
+      <div class="sol-card reveal">
+        <div class="sol-icon i4">📱</div>
+        <h3>Mode hors-ligne (PWA)</h3>
+        <p>Installable sur téléphone. Fonctionne sans connexion, synchronise dès que le réseau revient.</p>
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
-<section class="solution">
-  <div class="mono reveal">La solution</div>
-  <h2 class="reveal">Une plateforme pensée pour le terrain</h2>
-  <div class="solution-grid">
-    <div class="sol-card reveal">
-      <div class="sol-icon i1">📥</div>
-      <h3>Import automatique</h3>
-      <p>KoboToolbox, ODK, DHIS2, Excel. Vos données terrain remontent en temps réel. Zéro ressaisie.</p>
+  <!-- Comparaison -->
+  <section class="comparison">
+    <div class="comparison-inner">
+      <div class="mono reveal">Pourquoi SIDITECH</div>
+      <h2 class="reveal">Expertise locale, standards internationaux</h2>
+      <table class="comp-table reveal">
+        <tr>
+          <th></th>
+          <th>Consultant international</th>
+          <th>SIDITECH</th>
+        </tr>
+        <tr>
+          <td>Taux journalier</td>
+          <td>$400–800/jour</td>
+          <td class="win">$120–200/jour</td>
+        </tr>
+        <tr>
+          <td>Connaissance terrain Sahel</td>
+          <td>Variable (expat)</td>
+          <td class="win">Native (basé Nouakchott)</td>
+        </tr>
+        <tr>
+          <td>Optimisation réseau</td>
+          <td>Standards européens</td>
+          <td class="win">Testé 3G / Tecno / Samsung A</td>
+        </tr>
+        <tr>
+          <td>Support post-livraison</td>
+          <td>Fin de contrat</td>
+          <td class="win">Maintenance continue + SLA</td>
+        </tr>
+        <tr>
+          <td>Langues interface</td>
+          <td>EN / FR</td>
+          <td class="win">FR / AR (RTL) / EN</td>
+        </tr>
+        <tr>
+          <td>Disponibilité</td>
+          <td>Délai de mobilisation</td>
+          <td class="win">Immédiate (même fuseau)</td>
+        </tr>
+      </table>
     </div>
-    <div class="sol-card reveal">
-      <div class="sol-icon i2">📄</div>
-      <h3>Rapports bailleurs en 1 clic</h3>
-      <p>PDF/Excel aux formats exigés: USAID quarterly, UE narrative, AFD cadre logique, Banque Mondiale.</p>
-    </div>
-    <div class="sol-card reveal">
-      <div class="sol-icon i3">📊</div>
-      <h3>Dashboards multi-niveaux</h3>
-      <p>Siège, bureau pays, terrain. KPI, cartographie par zone, alertes. Accessible en 3G sur mobile.</p>
-    </div>
-    <div class="sol-card reveal">
-      <div class="sol-icon i4">📱</div>
-      <h3>Mode hors-ligne (PWA)</h3>
-      <p>Installable sur téléphone. Fonctionne sans connexion, synchronise dès que le réseau revient.</p>
-    </div>
-  </div>
-</section>
+  </section>
 
-<section class="comparison">
-  <div class="comparison-inner">
-    <div class="mono reveal">Pourquoi SIDITECH</div>
-    <h2 class="reveal">Expertise locale, standards internationaux</h2>
-    <table class="comp-table reveal">
-      <tr>
-        <th></th>
-        <th>Consultant international</th>
-        <th>SIDITECH</th>
-      </tr>
-      <tr>
-        <td>Taux journalier</td>
-        <td>$400–800/jour</td>
-        <td class="win">$120–200/jour</td>
-      </tr>
-      <tr>
-        <td>Connaissance terrain Sahel</td>
-        <td>Variable (expat)</td>
-        <td class="win">Native (basé Nouakchott)</td>
-      </tr>
-      <tr>
-        <td>Optimisation réseau</td>
-        <td>Standards européens</td>
-        <td class="win">Testé 3G / Tecno / Samsung A</td>
-      </tr>
-      <tr>
-        <td>Support post-livraison</td>
-        <td>Fin de contrat</td>
-        <td class="win">Maintenance continue + SLA</td>
-      </tr>
-      <tr>
-        <td>Langues interface</td>
-        <td>EN / FR</td>
-        <td class="win">FR / AR (RTL) / EN</td>
-      </tr>
-      <tr>
-        <td>Disponibilité</td>
-        <td>Délai de mobilisation</td>
-        <td class="win">Immédiate (même fuseau)</td>
-      </tr>
-    </table>
-  </div>
-</section>
-
-<section class="pricing" id="pricing">
-  <div class="mono reveal">Investissement</div>
-  <h2 class="reveal">Tarification projet</h2>
-  <p class="pricing-sub reveal">Budget transparent, pas de surprises. Prototype gratuit avant engagement.</p>
-  <div class="pricing-grid">
-    <div class="price-card reveal">
-      <h3>Pilote</h3>
-      <div class="amount">5M FCFA</div>
-      <div class="usd">~$8,000 USD</div>
-      <ul>
-        <li>Dashboard + import Kobo/Excel</li>
-        <li>1 rapport PDF automatique</li>
-        <li>Formation équipe M&E</li>
-        <li>3 mois de support inclus</li>
-      </ul>
+  <!-- Tarifs -->
+  <section class="pricing" id="pricing">
+    <div class="mono reveal">Investissement</div>
+    <h2 class="reveal">Tarification projet</h2>
+    <p class="pricing-sub reveal">Budget transparent, pas de surprises. Prototype gratuit avant engagement.</p>
+    <div class="pricing-grid">
+      <div class="price-card reveal">
+        <h3>Pilote</h3>
+        <div class="amount">5M FCFA</div>
+        <div class="usd">~$8,000 USD</div>
+        <ul>
+          <li>Dashboard + import Kobo/Excel</li>
+          <li>1 rapport PDF automatique</li>
+          <li>Formation équipe M&E</li>
+          <li>3 mois de support inclus</li>
+        </ul>
+      </div>
+      <div class="price-card featured reveal">
+        <h3>Standard</h3>
+        <div class="amount">15M FCFA</div>
+        <div class="usd">~$25,000 USD</div>
+        <ul>
+          <li>Plateforme multi-programmes</li>
+          <li>Rapports personnalisés bailleurs</li>
+          <li>Mode hors-ligne (PWA)</li>
+          <li>Gestion droits multi-niveaux</li>
+          <li>12 mois de maintenance</li>
+        </ul>
+      </div>
+      <div class="price-card reveal">
+        <h3>Enterprise</h3>
+        <div class="amount">35M+ FCFA</div>
+        <div class="usd">~$55,000+ USD</div>
+        <ul>
+          <li>Multi-pays / multi-bailleurs</li>
+          <li>Intégrations DHIS2, Power BI</li>
+          <li>Cartographie avancée</li>
+          <li>Audit sécurité données</li>
+          <li>SLA dédié</li>
+        </ul>
+      </div>
     </div>
-    <div class="price-card featured reveal">
-      <h3>Standard</h3>
-      <div class="amount">15M FCFA</div>
-      <div class="usd">~$25,000 USD</div>
-      <ul>
-        <li>Plateforme multi-programmes</li>
-        <li>Rapports personnalisés bailleurs</li>
-        <li>Mode hors-ligne (PWA)</li>
-        <li>Gestion droits multi-niveaux</li>
-        <li>12 mois de maintenance</li>
-      </ul>
-    </div>
-    <div class="price-card reveal">
-      <h3>Enterprise</h3>
-      <div class="amount">35M+ FCFA</div>
-      <div class="usd">~$55,000+ USD</div>
-      <ul>
-        <li>Multi-pays / multi-bailleurs</li>
-        <li>Intégrations DHIS2, Power BI</li>
-        <li>Cartographie avancée</li>
-        <li>Audit sécurité données</li>
-        <li>SLA dédié</li>
-      </ul>
-    </div>
-  </div>
-</section>
+  </section>
 
-<section class="cta">
-  <div class="cta-inner">
-    <h2 class="reveal">Prototype <em>gratuit</em> en 48h</h2>
-    <p class="reveal">Envoyez-nous votre AMELP ou cadre logique. On vous montre ce que ça donnerait, sans engagement.</p>
-    <div class="cta-actions reveal">
-      <a href="https://wa.me/22222149282?text=Bonjour%20SIDITECH%2C%20je%20voudrais%20un%20prototype%20M%26E%20pour%20notre%20programme.%20Voici%20notre%20cadre%20logique%3A" class="btn-primary btn-wa">💬 WhatsApp: +222 22 14 92 82</a>
-      <a href="mailto:sidiahm@gmail.com?subject=Prototype%20M%26E%20-%20[Nom%20du%20programme]&body=Bonjour%20Sidi%2C%0A%0ANous%20sommes%20int%C3%A9ress%C3%A9s%20par%20vos%20solutions%20M%26E.%20Voici%20notre%20programme%3A%0A%0A" class="btn-primary">✉️ Email</a>
+  <!-- CTA -->
+  <section class="cta">
+    <div class="cta-inner">
+      <h2 class="reveal">Prototype <em>gratuit</em> en 48h</h2>
+      <p class="reveal">Envoyez-nous votre AMELP ou cadre logique. On vous montre ce que ça donnerait, sans engagement.</p>
+      <div class="cta-actions reveal">
+        <a href="https://wa.me/22222149282?text=Bonjour%20SIDITECH%2C%20je%20voudrais%20un%20prototype%20M%26E%20pour%20notre%20programme.%20Voici%20notre%20cadre%20logique%3A" class="btn-primary btn-wa">💬 WhatsApp: +222 22 14 92 82</a>
+        <a href="mailto:sidiahm@gmail.com?subject=Prototype%20M%26E%20-%20[Nom%20du%20programme]&body=Bonjour%20Sidi%2C%0A%0ANous%20sommes%20int%C3%A9ress%C3%A9s%20par%20vos%20solutions%20M%26E.%20Voici%20notre%20programme%3A%0A%0A" class="btn-primary">✉️ Email</a>
+      </div>
+      <div class="cta-contacts reveal">
+        <div class="cta-contact"><strong>Email:</strong> sidiahm@gmail.com</div>
+        <div class="cta-contact"><strong>WhatsApp:</strong> +222 22 14 92 82</div>
+        <div class="cta-contact"><strong>Basé à:</strong> Nouakchott, Mauritanie</div>
+      </div>
     </div>
-    <div class="cta-contacts reveal">
-      <div class="cta-contact"><strong>Email:</strong> sidiahm@gmail.com</div>
-      <div class="cta-contact"><strong>WhatsApp:</strong> +222 22 14 92 82</div>
-      <div class="cta-contact"><strong>Basé à:</strong> Nouakchott, Mauritanie</div>
-    </div>
-  </div>
-</section>
+  </section>
 
-<footer>
-  © 2026 SIDITECH — Solutions Digitales pour l'Afrique | Nouakchott, Mauritanie
-</footer>
+  <footer>
+    © 2026 SIDITECH — Solutions Digitales pour l'Afrique | Nouakchott, Mauritanie
+  </footer>
 
-<script>
-const observer = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) entry.target.classList.add('visible');
-  });
-}, { threshold: 0.1 });
+  <script>
+    // Apparition au scroll
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) entry.target.classList.add('visible');
+      });
+    }, { threshold: 0.1 });
 
-document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
-</script>
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+  </script>
 </body>
 </html>
