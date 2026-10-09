@@ -7,6 +7,7 @@
 <meta name="description" content="Démo live et cliquable d'une plateforme de suivi-évaluation ONG : recherche, filtres, KPI recalculés et export CSV. Données fictives.">
 <meta name="robots" content="noindex">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
+<script defer src="analytics.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -287,7 +288,7 @@
     <h2 id="ctaTitle">Besoin de ça pour votre programme ?</h2>
     <p id="ctaSub">Je connects cette démo à vos données réelles — import KoboToolbox, Excel ou votre base — et vous livre un prototype fonctionnel.</p>
     <div class="cta-btns">
-      <a class="btn btn-wa" id="ctaWa" href="#" target="_blank" rel="noopener">💬 Démarrer sur WhatsApp</a>
+      <a class="btn btn-wa" id="ctaWa" href="#" target="_blank" rel="noopener" data-track="Demo → WhatsApp">💬 Démarrer sur WhatsApp</a>
       <a class="btn btn-light" href="index.html#devis" id="ctaQuote">Demander un devis</a>
     </div>
   </div>
@@ -381,6 +382,11 @@ for (var i=0;i<64;i++){
 for (var j=0;j<DATA.length;j++) DATA[j].programmeIdx = PROGRAMS.indexOf(DATA[j].programme);
 
 /* ---------------- Helpers DOM ---------------- */
+// analytics.js est charge en defer : __track peut ne pas exister encore.
+// On encapsule pour qu'une panne du suivi ne casse jamais la demo.
+function __track(){
+  if (typeof window.__track === 'function') window.__track.apply(null, arguments);
+}
 function $(id){ return document.getElementById(id); }
 function currentLang(){ return document.documentElement.lang === 'ar' ? 'ar' : 'fr'; }
 function t(key){ var L = I18N[currentLang()]; return (L && L[key] !== undefined) ? L[key] : I18N.fr[key]; }
@@ -510,6 +516,7 @@ function openModal(id){
   $('mNote').textContent = t('note');
   $('overlay').classList.add('open');
   document.body.style.overflow = 'hidden';
+  __track('Demo fiche detaillee');
   $('mClose').focus();
 }
 function closeModal(){
@@ -591,7 +598,7 @@ function applyLang(){
 }
 
 /* ---------------- Events ---------------- */
-$('q').addEventListener('input', function(e){ state.q = e.target.value; state.page = 0; render(); });
+$('q').addEventListener('input', function(e){ state.q = e.target.value; state.page = 0; __track('Demo recherche'); render(); });
 $('fProg').addEventListener('change', function(e){ state.prog = e.target.value; state.page = 0; render(); });
 $('fReg').addEventListener('change', function(e){ state.reg = e.target.value; state.page = 0; render(); });
 $('fStat').addEventListener('change', function(e){ state.statut = e.target.value; state.page = 0; render(); });
@@ -600,7 +607,7 @@ $('reset').addEventListener('click', function(){
   state.q=''; state.prog=''; state.reg=''; state.statut=''; state.page=0;
   $('q').value=''; fillSelects(); render();
 });
-$('export').addEventListener('click', exportCsv);
+$('export').addEventListener('click', function(){ __track('Demo export CSV'); exportCsv(); });
 
 document.querySelectorAll('th.sortable').forEach(function(th){
   th.addEventListener('click', function(){
