@@ -1,28 +1,33 @@
-/* Suivi d'evenements sans cookie ni identifiant personnel (Plausible).
+/* Suivi d'evenements sans cookie ni identifiant personnel — Plausible.
  *
- * Pourquoi ce fichier est charge en diferé (defer + requestIdleCallback) :
- * le site vise des visiteurs en 3G. Un script tiers bloque en tete de page
- * coutait cher en temps d'affichage ; ici il arrive apres le rendu.
+ * On utilise le "script proxy" (URL /js/pa-XXXX.js) plutot que le script
+ * standard /js/script.js avec data-domain :
+ *   - le domaine est deja injecte dans le proxy, donc aucune possibilite
+ *     de desynchronisation entre le code et le tableau de bord ;
+ *   - le proxy sert meme quand plausible.io/js/script.js est bloque, ce qui
+ *     arrive sur certains reseaux ;
+ *   - charge en async : ne bloque jamais l'affichage (contrainte 3G).
  *
- * Les clics survenus avant l'arrivee du vrai script sont mis en file
- * d'attente puis rattrapes, pour ne pas perdre les conversions rapides.
+ * ATTENTION : un seul script Plausible par page. Charger en plus un
+ * <script src="https://plausible.io/js/script.js" data-domain="...">
+ * compterait chaque pageview deux fois.
  *
- * Si le domaine n'est pas enregistre chez Plausible, le script se charge
- * quand meme mais n'envoie rien : aucune erreur visible, rien de casse.
+ * Si le site n'est pas enregistre ou pas valide chez Plausible, le script se
+ * charge quand meme mais n'envoie rien : aucune erreur visible.
  */
 (function () {
-  window.__siditechEvents = [];
-  window.__siditechStub = function () {};
+  var SRC = 'https://plausible.io/js/pa-ROq79g7J_aBXT640_YHK6.js';
+
+  // Stub-collecteur : les clics survenus avant l'arrivee du script sont
+  // empiles dans plausible.q, que le vrai script vidange a son chargement.
+  window.plausible = window.plausible || function () {
+    (window.plausible.q = window.plausible.q || []).push(arguments);
+  };
 
   function __track(name) {
-    if (window.plausible === window.__siditechStub) {
-      window.__siditechEvents.push(name);
-    } else if (typeof window.plausible === 'function') {
-      window.plausible(name);
-    }
+    if (typeof window.plausible === 'function') window.plausible(name);
   }
   window.__track = __track;
-  window.plausible = window.__siditechStub;
 
   // Un seul ecouteur pour tout le site : delegation sur [data-track]
   document.addEventListener('click', function (e) {
@@ -30,18 +35,8 @@
     if (el) __track(el.getAttribute('data-track'));
   }, true);
 
-  function load() {
-    var s = document.createElement('script');
-    s.defer = true;
-    s.setAttribute('data-domain', 'mpmd16829-tech.github.io');
-    s.src = 'https://plausible.io/js/script.js';
-    s.onload = function () {
-      window.__siditechEvents.forEach(function (n) { window.plausible(n); });
-      window.__siditechEvents.length = 0;
-    };
-    document.head.appendChild(s);
-  }
-
-  if ('requestIdleCallback' in window) requestIdleCallback(load, { timeout: 3000 });
-  else setTimeout(load, 1500);
+  var s = document.createElement('script');
+  s.async = true;
+  s.src = SRC;
+  document.head.appendChild(s);
 })();
