@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Démo interactive — Suivi des bénéficiaires | SIDITECH</title>
+<meta name="description" content="Démo live et cliquable d'une plateforme de suivi-évaluation ONG : recherche, filtres, KPI recalculés et export CSV. Données fictives.">
+<meta name="robots" content="noindex">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+
+  :root{
+    --primary:oklch(52% .16 250); --primary-dark:oklch(38% .14 250); --primary-pale:oklch(95% .04 250);
+    --accent:oklch(65% .2 145);  --accent-pale:oklch(93% .06 145);
+    --bg:oklch(99% .003 250); --surface:#fff;
+    --n50:oklch(98.5% .005 250); --n100:oklch(96% .006 250); --n200:oklch(91% .008 250); --n300:oklch(84% .008 250);
+    --n600:oklch(45% .01 250); --n800:oklch(25% .012 250); --n900:oklch(15% .015 250);
+    --ease:cubic-bezier(.16,1,.3,1);
+  }
+  html{scroll-behavior:smooth}
+  html[dir="rtl"]{font-family:'Noto Sans Arabic',system-ui,sans-serif}
+
+  body{
+    font-family:'Inter',system-ui,sans-serif; background:var(--bg); color:var(--n900);
+    line-height:1.6; font-size:16px; -webkit-font-smoothing:antialiased; padding-bottom:0;
+  }
+  h1,h2,h3{font-family:'Space Grotesk',system-ui,sans-serif;line-height:1.15;letter-spacing:-.02em}
+  html[dir="rtl"] h1,html[dir="rtl"] h2,html[dir="rtl"] h3{font-family:'Noto Sans Arabic',sans-serif}
+  a{color:inherit;text-decoration:none}
+  button{font-family:inherit;cursor:pointer}
+
+  /* ---------- Topbar ---------- */
+  .topbar{
+    position:sticky;top:0;z-index:50;background:oklch(99% .003 250/.92);backdrop-filter:blur(12px);
+    -webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--n200);
+    display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 20px;flex-wrap:wrap;
+  }
+  .brand{display:flex;align-items:center;gap:10px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.05rem;color:var(--primary-dark)}
+  .brand span{color:var(--accent)}
+  .topbar-actions{display:flex;align-items:center;gap:8px}
+  .btn-ghost{
+    background:var(--n100);border:1px solid var(--n200);border-radius:8px;padding:8px 14px;
+    font-size:.8rem;font-weight:600;color:var(--n600);transition:.15s var(--ease);display:inline-flex;align-items:center;gap:6px;
+  }
+  .btn-ghost:hover{border-color:var(--primary);color:var(--primary)}
+  .lang-mini{display:flex;background:var(--n100);border:1px solid var(--n200);border-radius:8px;padding:2px}
+  .lang-mini button{
+    background:transparent;border:none;border-radius:6px;padding:5px 11px;font-size:.78rem;
+    font-weight:600;color:var(--n600);transition:.15s;
+  }
+  .lang-mini button[aria-pressed="true"]{background:var(--primary);color:#fff}
+
+  /* ---------- Bandeau démo ---------- */
+  .notice{
+    background:var(--accent-pale);border-bottom:1px solid oklch(88% .06 145);
+    padding:10px 20px;font-size:.82rem;color:oklch(32% .1 145);text-align:center;font-weight:500;
+  }
+  .notice b{font-weight:700}
+
+  /* ---------- Hero ---------- */
+  .hero{padding:44px 20px 24px;max-width:1200px;margin:0 auto}
+  .eyebrow{color:var(--primary);font-size:.75rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;display:block}
+  .hero h1{font-size:clamp(1.6rem,4.5vw,2.3rem);margin-bottom:10px}
+  .hero p{color:var(--n600);max-width:62ch;font-size:.98rem}
+  .live-badge{
+    display:inline-flex;align-items:center;gap:7px;background:var(--primary-pale);color:var(--primary-dark);
+    padding:5px 13px;border-radius:100px;font-size:.75rem;font-weight:600;margin-bottom:14px;
+  }
+  .live-badge::before{content:'';width:7px;height:7px;background:var(--accent);border-radius:50%;animation:pulse 2s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
+
+  /* ---------- KPI ---------- */
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin:28px 0}
+  .kpi{background:var(--surface);border:1px solid var(--n200);border-radius:14px;padding:18px 20px}
+  .kpi-val{font-family:'Space Grotesk',sans-serif;font-size:1.9rem;font-weight:700;color:var(--primary-dark);font-variant-numeric:tabular-nums;line-height:1.1}
+  .kpi-val.up{color:oklch(52% .15 145)}
+  .kpi-lbl{font-size:.78rem;color:var(--n600);margin-top:3px}
+
+  /* ---------- Panneau filtres ---------- */
+  .panel{background:var(--surface);border:1px solid var(--n200);border-radius:16px;padding:20px;margin-bottom:20px}
+  .filters{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:12px;align-items:end}
+  .fg{display:flex;flex-direction:column;gap:5px}
+  .fg label{font-size:.75rem;font-weight:600;color:var(--n600)}
+  .fg input,.fg select{
+    width:100%;padding:11px 13px;border-radius:10px;border:1px solid var(--n300);background:var(--n50);
+    font-size:.9rem;font-family:inherit;color:var(--n900);outline:none;transition:border-color .15s;
+  }
+  .fg input:focus,.fg select:focus{border-color:var(--primary);background:#fff}
+  .filter-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;padding-top:14px;border-top:1px solid var(--n100)}
+  .btn{
+    border-radius:10px;padding:10px 18px;font-size:.85rem;font-weight:600;border:1px solid transparent;
+    display:inline-flex;align-items:center;gap:7px;transition:.15s var(--ease);
+  }
+  .btn-primary{background:var(--primary);color:#fff}
+  .btn-primary:hover{background:var(--primary-dark)}
+  .btn-outline{background:transparent;border-color:var(--n300);color:var(--n600)}
+  .btn-outline:hover{border-color:var(--primary);color:var(--primary)}
+  .result-count{font-size:.82rem;color:var(--n600);margin-inline-start:auto;align-self:center}
+
+  /* ---------- Graphe (pur CSS, hors-ligne) ---------- */
+  .chart-title{font-size:.95rem;font-weight:600;margin-bottom:4px}
+  .chart-sub{font-size:.78rem;color:var(--n600);margin-bottom:18px}
+  .bars{display:flex;flex-direction:column;gap:12px}
+  .bar-row{display:grid;grid-template-columns:minmax(120px,180px) 1fr auto;gap:12px;align-items:center}
+  .bar-lbl{font-size:.83rem;color:var(--n600);font-weight:500}
+  .bar-track{background:var(--n100);border-radius:7px;height:26px;overflow:hidden}
+  .bar-fill{
+    height:100%;border-radius:7px;background:linear-gradient(90deg,var(--primary),oklch(62% .14 250));
+    width:0;transition:width .5s var(--ease);min-width:2px;
+  }
+  .bar-val{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:.85rem;color:var(--primary-dark);font-variant-numeric:tabular-nums;min-width:44px;text-align:end}
+
+  /* ---------- Tableau ---------- */
+  .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--n200);border-radius:16px;background:var(--surface)}
+  table{width:100%;border-collapse:collapse;font-size:.87rem;min-width:640px}
+  th{
+    text-align:start;font-size:.72rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;
+    color:var(--n600);padding:13px 16px;border-bottom:1px solid var(--n200);background:var(--n50);
+    position:sticky;top:0;white-space:nowrap;
+  }
+  th.sortable{cursor:pointer;user-select:none}
+  th.sortable:hover{color:var(--primary)}
+  th .arrow{opacity:.35;font-size:.7rem}
+  th[data-dir="asc"] .arrow,th[data-dir="desc"] .arrow{opacity:1;color:var(--primary)}
+  td{padding:12px 16px;border-bottom:1px solid var(--n100);vertical-align:middle}
+  tbody tr{cursor:pointer;transition:background .12s}
+  tbody tr:hover{background:var(--primary-pale)}
+  tbody tr:last-child td{border-bottom:none}
+  .mono{font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:.82rem;color:var(--n600)}
+  .pill{display:inline-block;padding:3px 11px;border-radius:100px;font-size:.75rem;font-weight:600;white-space:nowrap}
+  .s-actif{background:var(--accent-pale);color:oklch(35% .12 145)}
+  .s-sorti{background:var(--n100);color:var(--n600)}
+  .s-susp{background:oklch(93% .06 55);color:oklch(38% .13 55)}
+  .empty{padding:52px 20px;text-align:center;color:var(--n600)}
+  .empty strong{display:block;font-size:1rem;color:var(--n900);margin-bottom:5px}
+
+  /* ---------- Modal detail ---------- */
+  .overlay{
+    position:fixed;inset:0;background:oklch(15% .015 250/.55);backdrop-filter:blur(3px);
+    display:none;align-items:center;justify-content:center;padding:20px;z-index:100;
+  }
+  .overlay.open{display:flex}
+  .modal{
+    background:var(--surface);border-radius:18px;max-width:520px;width:100%;max-height:88vh;overflow-y:auto;
+    box-shadow:0 24px 64px oklch(15% .015 250/.3);
+  }
+  .modal-head{padding:22px 24px 16px;border-bottom:1px solid var(--n100);display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+  .modal-head h3{font-size:1.2rem}
+  .modal-id{font-family:ui-monospace,monospace;font-size:.8rem;color:var(--n600);margin-top:3px}
+  .close{
+    background:var(--n100);border:none;border-radius:8px;width:32px;height:32px;font-size:1.1rem;
+    color:var(--n600);line-height:1;flex-shrink:0;
+  }
+  .close:hover{background:var(--n200)}
+  .modal-body{padding:20px 24px 24px}
+  .dl{display:grid;grid-template-columns:auto 1fr;gap:11px 18px;font-size:.88rem}
+  .dt{color:var(--n600);font-weight:500}
+  .dd{font-weight:600}
+  .note{
+    margin-top:20px;padding:13px 15px;background:var(--primary-pale);border-radius:10px;
+    font-size:.8rem;color:var(--primary-dark);line-height:1.55;
+  }
+
+  /* ---------- CTA ---------- */
+  .cta{background:var(--n900);color:#fff;padding:52px 20px;text-align:center}
+  .cta-inner{max-width:620px;margin:0 auto}
+  .cta h2{font-size:clamp(1.5rem,3.5vw,2rem);margin-bottom:12px}
+  .cta p{color:oklch(78% .01 250);margin-bottom:26px;font-size:.95rem}
+  .cta-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+  .btn-wa{background:oklch(55% .18 155);color:#fff;font-weight:600}
+  .btn-wa:hover{background:oklch(50% .18 155)}
+  .btn-light{background:#fff;color:var(--n900);font-weight:600}
+  .btn-light:hover{background:var(--n100)}
+  .foot{padding:26px 20px;text-align:center;font-size:.8rem;color:var(--n600);border-top:1px solid var(--n200)}
+
+  @media(max-width:860px){
+    .filters{grid-template-columns:1fr 1fr}
+    .fg-search{grid-column:1/-1}
+  }
+  @media(max-width:560px){
+    .filters{grid-template-columns:1fr}
+    .bar-row{grid-template-columns:1fr;gap:5px}
+    .bar-val{min-width:auto;text-align:start}
+    .result-count{margin-inline-start:0;width:100%}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a class="brand" href="index.html">SIDI<span>TECH</span></a>
+  <div class="topbar-actions">
+    <a class="btn-ghost" href="ong.html" id="backLink">← Fiche solution</a>
+    <div class="lang-mini">
+      <button type="button" data-lang="fr" aria-pressed="true">FR</button>
+      <button type="button" data-lang="ar" aria-pressed="false">عربي</button>
+    </div>
+  </div>
+</div>
+
+<p class="notice" id="notice"><b>Démo live</b> — données entièrement fictives, générées pour l'illustration.</p>
+
+<div class="hero">
+  <span class="live-badge" id="liveBadge">Application en ligne</span>
+  <span class="eyebrow" id="eyebrow">Suivi-évaluation ONG</span>
+  <h1 id="heroTitle">Registre des bénéficiaires</h1>
+  <p id="heroSub">Filtrez, recherchez et exportez. Les indicateurs se recalculent en temps réel — exactement comme dans la plateforme livrée à un programme.</p>
+</div>
+
+<div class="kpis" id="kpis"></div>
+
+<div class="panel">
+  <div class="filters">
+    <div class="fg fg-search">
+      <label for="q" id="lblSearch">Rechercher</label>
+      <input type="search" id="q" placeholder="Nom ou identifiant (ex. BEN-014)">
+    </div>
+    <div class="fg">
+      <label for="fProg" id="lblProg">Programme</label>
+      <select id="fProg"></select>
+    </div>
+    <div class="fg">
+      <label for="fReg" id="lblReg">Région</label>
+      <select id="fReg"></select>
+    </div>
+    <div class="fg">
+      <label for="fStat" id="lblStat">Statut</label>
+      <select id="fStat"></select>
+    </div>
+  </div>
+  <div class="filter-actions">
+    <button class="btn btn-outline" id="reset" type="button">↺ Réinitialiser</button>
+    <button class="btn btn-primary" id="export" type="button">↓ Exporter CSV</button>
+    <span class="result-count" id="count"></span>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="chart-title" id="chartTitle">Répartition par programme</div>
+  <div class="chart-sub" id="chartSub">Sur la sélection courante</div>
+  <div class="bars" id="bars"></div>
+</div>
+
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th class="sortable" data-key="id">ID <span class="arrow">↕</span></th>
+        <th class="sortable" data-key="nom">Bénéficiaire <span class="arrow">↕</span></th>
+        <th class="sortable" data-key="programme">Programme <span class="arrow">↕</span></th>
+        <th class="sortable" data-key="region">Région <span class="arrow">↕</span></th>
+        <th class="sortable" data-key="age">Âge <span class="arrow">↕</span></th>
+        <th class="sortable" data-key="statut">Statut <span class="arrow">↕</span></th>
+        <th class="sortable" data-key="score">Score <span class="arrow">↕</span></th>
+      </tr>
+    </thead>
+    <tbody id="tbody"></tbody>
+  </table>
+  <div class="empty" id="empty" hidden>
+    <strong id="emptyTitle">Aucun résultat</strong>
+    <span id="emptySub">Ajustez vos filtres ou réinitialisez.</span>
+  </div>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="mName">
+    <div class="modal-head">
+      <div>
+        <h3 id="mName"></h3>
+        <div class="modal-id" id="mId"></div>
+      </div>
+      <button class="close" id="mClose" type="button" aria-label="Fermer">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="dl" id="mBody"></div>
+      <div class="note" id="mNote"></div>
+    </div>
+  </div>
+</div>
+
+<div class="cta">
+  <div class="cta-inner">
+    <h2 id="ctaTitle">Besoin de ça pour votre programme ?</h2>
+    <p id="ctaSub">Je connects cette démo à vos données réelles — import KoboToolbox, Excel ou votre base — et vous livre un prototype fonctionnel.</p>
+    <div class="cta-btns">
+      <a class="btn btn-wa" id="ctaWa" href="#" target="_blank" rel="noopener">💬 Démarrer sur WhatsApp</a>
+      <a class="btn btn-light" href="index.html#devis" id="ctaQuote">Demander un devis</a>
+    </div>
+  </div>
+</div>
+
+<p class="foot" id="foot">© 2026 SIDITECH — Nouakchott, Mauritanie</p>
+
+<script>
+(function(){
+'use strict';
+
+/* ---------------- i18n ---------------- */
+var I18N = {
+  fr:{ notif:'<b>Démo live</b> — données entièrement fictives, générées pour l\'illustration.', badge:'Application en ligne',
+    eyebrow:'Suivi-évaluation ONG', title:'Registre des bénéficiaires',
+    sub:'Filtrez, recherchez et exportez. Les indicateurs se recalculent en temps réel — exactement comme dans la plateforme livrée à un programme.',
+    back:'← Fiche solution', search:'Rechercher', searchPh:'Nom ou identifiant (ex. BEN-014)',
+    prog:'Programme', reg:'Région', stat:'Statut', allProg:'Tous les programmes', allReg:'Toutes les régions', allStat:'Tous les statuts',
+    reset:'↺ Réinitialiser', exp:'↓ Exporter CSV', chartT:'Répartition par programme', chartS:'Sur la sélection courante',
+    idCol:'ID', nomCol:'Bénéficiaire', progCol:'Programme', regCol:'Région', ageCol:'Âge', statCol:'Statut', scoreCol:'Score',
+    kTotal:'Bénéficiaires', kActif:'Actifs', kSorti:'Sortis du programme', kMoy:'Score moyen',
+    emptyT:'Aucun résultat', emptyS:'Ajustez vos filtres ou réinitialisez.',
+    ctaT:'Besoin de ça pour votre programme ?',
+    ctaS:'Je connects cette démo à vos données réelles — import KoboToolbox, Excel ou votre base — et vous livre un prototype fonctionnel.',
+    ctaWa:'💬 Démarrer sur WhatsApp', ctaQ:'Demander un devis',
+    dAge:'Âge', dSexe:'Sexe', dTaille:'Taille ménage', dInsc:'Inscription', dSuivi:'Dernier suivi', dReg:'Région', dProg:'Programme', dScore:'Score sécurité alimentaire',
+    note:'Fiche réelle : notes, visites à domicile, subsidy et pièces justificatives. Version livrée avec export PDF bailleur et mode hors-ligne.',
+    one:'bénéficiaire', many:'bénéficiaires', showing:'sur', of:'affichés', waMsg:'Bonjour SIDITECH, j\'ai testé la démo du registre des bénéficiaires. J\'aimerais en savoir plus pour mon programme.' },
+  ar:{ notif:'<b>عرض تجريبي حي</b> — بيانات وهمية بالكامل، مولدة لأغراض العرض فقط.', badge:'تطبيق يعمل مباشرة',
+    eyebrow:'رصد وتقييم المنظمات', title:'سجل المستفيدين',
+    sub:'صفِّ وبحث وصدّر. تُحسب المؤشرات فورياً — تماماً كما في المنصة المُسلَّمة للبرنامج.',
+    back:'→ ملف الحل', search:'بحث', searchPh:'الاسم أو المعرّف (مثال BEN-014)',
+    prog:'البرنامج', reg:'المنطقة', stat:'الحالة', allProg:'كل البرامج', allReg:'كل المناطق', allStat:'كل الحالات',
+    reset:'↺ إعادة تعيين', exp:'↓ تصدير CSV', chartT:'التوزيع حسب البرنامج', chartS:'على التحديد الحالي',
+    idCol:'المعرّف', nomCol:'المستفيد', progCol:'البرنامج', regCol:'المنطقة', ageCol:'العمر', statCol:'الحالة', scoreCol:'النتيجة',
+    kTotal:'المستفيدون', kActif:'نشطون', kSorti:'خرجوا من البرنامج', kMoy:'متوسط النتيجة',
+    emptyT:'لا نتائج', emptyS:'عدّل المرشحات أو أعد التعيين.',
+    ctaT:'تحتاج هذا لبرنامجك؟',
+    ctaS:'أربط هذا العرض ببياناتك الحقيقية — KoboToolbox أو Excel أو قاعدة بياناتك — وأسلّمك نموذجاً يعمل.',
+    ctaWa:'💬 ابدأ عبر واتساب', ctaQ:'اطلب عرض سعر',
+    dAge:'العمر', dSexe:'الجنس', dTaille:'حجم الأسرة', dInsc:'التسجيل', dSuivi:'آخر متابعة', dReg:'المنطقة', dProg:'البرنامج', dScore:'درجة insecurity غذائي',
+    note:'بطاقة حقيقية: درجات، زيارات منزلية، دعم مالي ووثائق إثبات. النسخة المسلّمة مع تصدير PDF للعملاء ووضع دون اتصال.',
+    one:'مستفيد', many:'مستفيدين', showing:'من', of:'معروض', waMsg:'مرحباً SIDITECH، جربت عرض سجل المستفيدين. أرغب بمعرفة المزيد لبرنامجي.' }
+};
+
+/* ---------------- Donnees fictives (generateur deterministe) ---------------- */
+var PROGRAMS = ['Nutrition','Sante','Education','Eau & Assainissement','Protection'];
+var PROGRAMS_AR = ['التغذية','الصحة','التعليم','الماء والصرف','الحماية'];
+var REGIONS = ['Nouakchott','Dakhla','Trarza','Adrar','Gambel','Guidimaka','Houffet','Kiffa','Tombouctou'];
+var STATUS = ['Actif','Sorti du programme','Suspendu'];
+var STATUS_AR = ['نشط','خرج من البرنامج','موقوف'];
+var NOM = ['Fatimetou','Mariama','Khalifa','Aminata','Mohamed','Zeinab','Ousmane','Fatou','Ibrahim','Nana','Cheikh','Awa','Abdoulaye','Rokhaya','Mamadou','Kadiatou','Sidi','Halima','Mohamedou','Ndeye','Aliou','Bintou','Ahmed','Khady','Moussa','Sokhna','Djibril','Maïmouna','Youssouf','Tetty','El Hadj','Massaran'];
+var PRENOMS_H = ['Ibrahim','Mohamed','Ousmane','Cheikh','Abdoulaye','Mamadou','Sidi','Aliou','Ahmed','Moussa','Djibril','Youssouf','El Hadj'];
+var PRENOMS_F = ['Fatimetou','Mariama','Aminata','Zeinab','Fatou','Nana','Awa','Rokhaya','Kadiatou','Halima','Ndeye','Bintou','Khady','Sokhna','Maïmouna','Tetty','Massaran'];
+
+var seed = 20260101;
+function rnd(){ seed = (seed * 1103515245 + 12345) % 2147483648; return seed / 2147483648; }
+function pick(a){ return a[Math.floor(rnd()*a.length)]; }
+function ri(min,max){ return min + Math.floor(rnd()*(max-min+1)); }
+function pad(n){ return n<10 ? '0'+n : ''+n; }
+function pad3(n){ return (n<10?'00':n<100?'0':'') + n; }
+function isoDate(y0,y1){
+  var y = ri(y0,y1), m = ri(1,12), d = ri(1,28);
+  return y + '-' + pad(m) + '-' + pad(d);
+}
+
+var DATA = [];
+for (var i=0;i<64;i++){
+  var f = rnd() < 0.55;
+  var nom = pick(NOM);
+  var prenom = f ? pick(PRENOMS_F) : pick(PRENOMS_H);
+  var r = rnd();
+  var statut = r < 0.68 ? STATUS[0] : (r < 0.9 ? STATUS[1] : STATUS[2]);
+  DATA.push({
+    id: 'BEN-' + pad3(i + 1),
+    nom: prenom + ' ' + nom,
+    programme: pick(PROGRAMS),
+    programmeIdx: 0,
+    region: pick(REGIONS),
+    statut: statut,
+    statutIdx: STATUS.indexOf(statut),
+    age: ri(2,79),
+    sexe: f ? 'F' : 'M',
+    taille: ri(1,12),
+    inscription: isoDate(2022,2025),
+    suivi: isoDate(2025,2026),
+    score: ri(0,8)
+  });
+}
+// indices de programme coherents (re-utilises pour l'affichage arabe)
+for (var j=0;j<DATA.length;j++) DATA[j].programmeIdx = PROGRAMS.indexOf(DATA[j].programme);
+
+/* ---------------- Helpers DOM ---------------- */
+function $(id){ return document.getElementById(id); }
+function currentLang(){ return document.documentElement.lang === 'ar' ? 'ar' : 'fr'; }
+function t(key){ var L = I18N[currentLang()]; return (L && L[key] !== undefined) ? L[key] : I18N.fr[key]; }
+function num(n){ return n.toLocaleString('fr-FR'); }
+function progLabel(idx){ return currentLang()==='ar' ? PROGRAMS_AR[idx] : PROGRAMS[idx]; }
+function statLabel(idx){ return currentLang()==='ar' ? STATUS_AR[idx] : STATUS[idx]; }
+function statClass(idx){ return idx===0 ? 's-actif' : (idx===1 ? 's-sorti' : 's-susp'); }
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+/* ---------------- Etat ---------------- */
+var state = { q:'', prog:'', reg:'', statut:'', sort:'id', dir:'asc', page:0, PER:12 };
+
+/* ---------------- Filtrage ---------------- */
+function filtered(){
+  var q = state.q.trim().toLowerCase();
+  var out = DATA.filter(function(b){
+    if (state.prog && b.programme !== state.prog) return false;
+    if (state.reg && b.region !== state.reg) return false;
+    if (state.statut && STATUS[b.statutIdx] !== state.statut) return false;
+    if (q){
+      var hay = (b.nom + ' ' + b.id + ' ' + b.region).toLowerCase();
+      if (hay.indexOf(q) === -1) return false;
+    }
+    return true;
+  });
+  out.sort(function(a,b){
+    var A = a[state.sort], B = b[state.sort];
+    if (A === B) return a.id < b.id ? -1 : 1;
+    var r = (typeof A === 'number') ? A - B : String(A).localeCompare(String(B), 'fr');
+    return state.dir === 'asc' ? r : -r;
+  });
+  return out;
+}
+
+/* ---------------- Rendu ---------------- */
+function renderKpis(rows){
+  var actif = 0, sorti = 0, sum = 0;
+  rows.forEach(function(b){ if(b.statutIdx===0) actif++; else if(b.statutIdx===1) sorti++; sum += b.score; });
+  var moy = rows.length ? (sum/rows.length) : 0;
+  var tiles = [
+    { v: num(rows.length), l: t('kTotal') },
+    { v: num(actif), l: t('kActif'), up: true },
+    { v: num(sorti), l: t('kSorti') },
+    { v: moy.toFixed(1), l: t('kMoy') }
+  ];
+  $('kpis').innerHTML = tiles.map(function(x){
+    return '<div class="kpi"><div class="kpi-val'+(x.up?' up':'')+'">'+x.v+'</div><div class="kpi-lbl">'+esc(x.l)+'</div></div>';
+  }).join('');
+}
+
+function renderBars(rows){
+  var counts = PROGRAMS.map(function(){ return 0; });
+  rows.forEach(function(b){ counts[b.programmeIdx]++; });
+  var max = Math.max.apply(null, counts.concat([1]));
+  $('bars').innerHTML = PROGRAMS.map(function(p,i){
+    var c = counts[i], pct = Math.round((c/max)*100);
+    return '<div class="bar-row">'
+      + '<div class="bar-lbl">'+esc(progLabel(i))+'</div>'
+      + '<div class="bar-track"><div class="bar-fill" style="width:'+pct+'%"></div></div>'
+      + '<div class="bar-val">'+num(c)+'</div>'
+      + '</div>';
+  }).join('');
+}
+
+function renderTable(rows){
+  var total = rows.length;
+  var pages = Math.max(1, Math.ceil(total / state.PER));
+  if (state.page >= pages) state.page = pages - 1;
+  var slice = rows.slice(state.page*state.PER, state.page*state.PER + state.PER);
+
+  $('empty').hidden = total > 0;
+  $('count').textContent = total + ' ' + (total===1 ? t('one') : t('many')) + ' ' + t('showing') + ' ' + DATA.length;
+
+  $('tbody').innerHTML = slice.map(function(b){
+    return '<tr data-id="'+b.id+'" tabindex="0">'
+      + '<td class="mono">'+esc(b.id)+'</td>'
+      + '<td style="font-weight:600">'+esc(b.nom)+'</td>'
+      + '<td>'+esc(progLabel(b.programmeIdx))+'</td>'
+      + '<td>'+esc(b.region)+'</td>'
+      + '<td>'+b.age+'</td>'
+      + '<td><span class="pill '+statClass(b.statutIdx)+'">'+esc(statLabel(b.statutIdx))+'</span></td>'
+      + '<td><strong>'+b.score+'</strong> / 8</td>'
+      + '</tr>';
+  }).join('');
+
+  // pagination si necessaire
+  var pag = $('pagination');
+  if (total > state.PER){
+    if (!pag){
+      pag = document.createElement('div');
+      pag.id = 'pagination';
+      pag.style.cssText = 'display:flex;gap:8px;align-items:center;justify-content:center;padding:16px;flex-wrap:wrap';
+      document.querySelector('.table-wrap').appendChild(pag);
+    }
+    pag.innerHTML = '<button class="btn btn-outline" data-pg="-1" '+(state.page===0?'disabled':'')+'>&larr;</button>'
+      + '<span style="font-size:.85rem;color:var(--n600)">'+(state.page+1)+' / '+pages+'</span>'
+      + '<button class="btn btn-outline" data-pg="1" '+(state.page>=pages-1?'disabled':'')+'>&rarr;</button>';
+    pag.style.display = 'flex';
+  } else if (pag) { pag.style.display = 'none'; }
+}
+
+function render(){
+  var rows = filtered();
+  renderKpis(rows);
+  renderBars(rows);
+  renderTable(rows);
+}
+
+/* ---------------- Modal ---------------- */
+function openModal(id){
+  var b = null;
+  for (var i=0;i<DATA.length;i++) if (DATA[i].id === id) { b = DATA[i]; break; }
+  if (!b) return;
+  $('mName').textContent = b.nom;
+  $('mId').textContent = b.id + ' · ' + b.region;
+  $('mBody').innerHTML = [
+    [t('dProg'), esc(progLabel(b.programmeIdx))],
+    [t('dReg'), esc(b.region)],
+    [t('dAge'), b.age + ' ans'],
+    [t('dSexe'), b.sexe === 'F' ? 'F' : 'M'],
+    [t('dTaille'), b.taille],
+    [t('dInsc'), b.inscription],
+    [t('dSuivi'), b.suivi],
+    [t('dScore'), b.score + ' / 8'],
+    [t('stat'), '<span class="pill '+statClass(b.statutIdx)+'">'+esc(statLabel(b.statutIdx))+'</span>']
+  ].map(function(r){ return '<div class="dt">'+esc(r[0])+'</div><div class="dd">'+r[1]+'</div>'; }).join('');
+  $('mNote').textContent = t('note');
+  $('overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  $('mClose').focus();
+}
+function closeModal(){
+  $('overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+/* ---------------- Export CSV ---------------- */
+function exportCsv(){
+  var rows = filtered();
+  var sep = ';';
+  var head = ['ID','Nom','Programme','Region','Age','Sexe','TailleMenage','Inscription','DernierSuivi','Statut','Score'];
+  var lines = [head.join(sep)];
+  rows.forEach(function(b){
+    lines.push([b.id, b.nom, b.programme, b.region, b.age, b.sexe, b.taille, b.inscription, b.suivi, STATUS[b.statutIdx], b.score].join(sep));
+  });
+  var blob = new Blob(['﻿' + lines.join('\r\n')], {type:'text/csv;charset=utf-8'});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'beneficiaires-siditech-demo.csv';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(a.href); }, 1000);
+}
+
+/* ---------------- Selects ---------------- */
+function fillSelects(){
+  var optsP = '<option value="">'+esc(t('allProg'))+'</option>' + PROGRAMS.map(function(p,i){ return '<option value="'+esc(p)+'">'+esc(progLabel(i))+'</option>'; }).join('');
+  var optsR = '<option value="">'+esc(t('allReg'))+'</option>' + REGIONS.map(function(r){ return '<option value="'+esc(r)+'">'+esc(r)+'</option>'; }).join('');
+  var optsS = '<option value="">'+esc(t('allStat'))+'</option>' + STATUS.map(function(s,i){ return '<option value="'+esc(s)+'">'+esc(statLabel(i))+'</option>'; }).join('');
+  $('fProg').innerHTML = optsP; $('fReg').innerHTML = optsR; $('fStat').innerHTML = optsS;
+  // on Conserve la valeur selectionnee apres changement de langue
+  $('fProg').value = state.prog; $('fReg').value = state.reg; $('fStat').value = state.statut;
+}
+
+/* ---------------- Langue ---------------- */
+function applyLang(){
+  var ar = currentLang() === 'ar';
+  document.documentElement.lang = ar ? 'ar' : 'fr';
+  document.documentElement.dir = ar ? 'rtl' : 'ltr';
+
+  $('notice').innerHTML = t('notif');
+  $('liveBadge').textContent = t('badge');
+  $('eyebrow').textContent = t('eyebrow');
+  $('heroTitle').textContent = t('title');
+  $('heroSub').textContent = t('sub');
+  $('backLink').textContent = t('back');
+
+  $('lblSearch').textContent = t('search'); $('q').placeholder = t('searchPh');
+  $('lblProg').textContent = t('prog');
+  $('lblReg').textContent = t('reg');
+  $('lblStat').textContent = t('stat');
+  $('reset').textContent = t('reset');
+  $('export').textContent = t('exp');
+  $('chartTitle').textContent = t('chartT');
+  $('chartSub').textContent = t('chartS');
+
+  var cols = { id:t('idCol'), nom:t('nomCol'), programme:t('progCol'), region:t('regCol'), age:t('ageCol'), statut:t('statCol'), score:t('scoreCol') };
+  var ths = document.querySelectorAll('th.sortable');
+  for (var i=0;i<ths.length;i++){
+    var key = ths[i].getAttribute('data-key');
+    ths[i].innerHTML = esc(cols[key]) + ' <span class="arrow">↕</span>';
+  }
+
+  $('emptyTitle').textContent = t('emptyT');
+  $('emptySub').textContent = t('emptyS');
+  $('ctaTitle').textContent = t('ctaT');
+  $('ctaSub').textContent = t('ctaS');
+  $('ctaWa').textContent = t('ctaWa');
+  $('ctaQuote').textContent = t('ctaQ');
+  $('ctaWa').href = 'https://wa.me/22222149282?text=' + encodeURIComponent(t('waMsg'));
+  $('foot').innerHTML = '&copy; 2026 SIDITECH — ' + (ar ? 'نواكشوط، موريتانيا' : 'Nouakchott, Mauritanie');
+
+  document.querySelectorAll('.lang-mini button').forEach(function(b){
+    b.setAttribute('aria-pressed', String((b.getAttribute('data-lang')==='ar') === ar));
+  });
+
+  fillSelects();
+  render();
+}
+
+/* ---------------- Events ---------------- */
+$('q').addEventListener('input', function(e){ state.q = e.target.value; state.page = 0; render(); });
+$('fProg').addEventListener('change', function(e){ state.prog = e.target.value; state.page = 0; render(); });
+$('fReg').addEventListener('change', function(e){ state.reg = e.target.value; state.page = 0; render(); });
+$('fStat').addEventListener('change', function(e){ state.statut = e.target.value; state.page = 0; render(); });
+
+$('reset').addEventListener('click', function(){
+  state.q=''; state.prog=''; state.reg=''; state.statut=''; state.page=0;
+  $('q').value=''; fillSelects(); render();
+});
+$('export').addEventListener('click', exportCsv);
+
+document.querySelectorAll('th.sortable').forEach(function(th){
+  th.addEventListener('click', function(){
+    var key = th.getAttribute('data-key');
+    if (state.sort === key) state.dir = state.dir === 'asc' ? 'desc' : 'asc';
+    else { state.sort = key; state.dir = 'asc'; }
+    document.querySelectorAll('th.sortable').forEach(function(o){ o.removeAttribute('data-dir'); });
+    th.setAttribute('data-dir', state.dir);
+    state.page = 0; render();
+  });
+});
+
+$('tbody').addEventListener('click', function(e){
+  var tr = e.target.closest('tr'); if (tr) openModal(tr.getAttribute('data-id'));
+});
+$('tbody').addEventListener('keydown', function(e){
+  if (e.key === 'Enter' || e.key === ' '){
+    var tr = e.target.closest('tr');
+    if (tr){ e.preventDefault(); openModal(tr.getAttribute('data-id')); }
+  }
+});
+document.addEventListener('click', function(e){
+  var pg = e.target.closest('[data-pg]');
+  if (pg && !pg.disabled){
+    state.page += parseInt(pg.getAttribute('data-pg'), 10);
+    if (state.page < 0) state.page = 0;
+    render();
+  }
+});
+
+$('mClose').addEventListener('click', closeModal);
+$('overlay').addEventListener('click', function(e){ if (e.target === $('overlay')) closeModal(); });
+document.addEventListener('keydown', function(e){ if (e.key === 'Escape') closeModal(); });
+
+document.querySelectorAll('.lang-mini button').forEach(function(b){
+  b.addEventListener('click', function(){ applyLang(); });
+});
+
+/* ---------------- Init ---------------- */
+applyLang();
+})();
+</script>
+</body>
+</html>

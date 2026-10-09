@@ -5,6 +5,25 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SIDITECH — Solutions Digitales pour l'Afrique</title>
   <meta name="description" content="Solutions numériques sur mesure pour les administrations, ONG, entreprises et établissements scolaires d'Afrique. 25+ applications développées.">
+  <link rel="canonical" href="https://mpmd16829-tech.github.io/siditech-portfolio/">
+
+  <!-- Partage réseaux sociaux / WhatsApp -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://mpmd16829-tech.github.io/siditech-portfolio/">
+  <meta property="og:site_name" content="SIDITECH">
+  <meta property="og:locale" content="fr_FR">
+  <meta property="og:title" content="SIDITECH — Solutions digitales pour l'Afrique">
+  <meta property="og:description" content="Applications sur mesure pour ONG, administrations, entreprises et écoles d'Afrique francophone. Démo interactive en ligne. Prototype en 48h.">
+  <meta property="og:image" content="https://mpmd16829-tech.github.io/siditech-portfolio/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="SIDITECH — Solutions digitales pour l'Afrique">
+  <meta name="twitter:description" content="Applications sur mesure pour ONG, administrations, entreprises et écoles d'Afrique francophone.">
+  <meta name="twitter:image" content="https://mpmd16829-tech.github.io/siditech-portfolio/og-image.png">
+  <meta name="theme-color" content="#2b6cb0">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="favicon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -125,6 +144,36 @@
     }
 
     .nav-logo span { color: var(--accent); }
+
+    /* ---------- Burger menu (mobile) ---------- */
+    .nav-burger {
+      display: none;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      padding: 10px;
+      flex-direction: column;
+      justify-content: center;
+      gap: 5px;
+      width: 42px;
+      height: 42px;
+      align-items: center;
+    }
+
+    .nav-burger span {
+      display: block;
+      width: 22px;
+      height: 2px;
+      background: var(--primary-dark);
+      border-radius: 2px;
+      transition: transform 250ms var(--ease-out-quart), opacity 200ms;
+    }
+
+    .nav-burger[aria-expanded="true"] span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .nav-burger[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
+    .nav-burger[aria-expanded="true"] span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+    .nav-burger:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; border-radius: 6px; }
 
     .nav-links {
       display: flex;
@@ -466,6 +515,16 @@
 
     .demo-cta:hover { gap: 10px; }
 
+    .demo-cta-live::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+      animation: pulse 2s infinite;
+      flex-shrink: 0;
+    }
+
     /* ---------- Stack ---------- */
     .stack {
       padding: 80px 40px;
@@ -584,6 +643,24 @@
 
     .form-submit:hover { transform: translateY(-2px); }
 
+    .form-status {
+      font-size: 0.85rem;
+      line-height: 1.6;
+      min-height: 1.2em;
+      color: oklch(80% 0.01 250);
+    }
+    .form-status.ok { color: oklch(85% 0.14 155); }
+    .form-status.warn { color: oklch(85% 0.13 75); }
+    .form-status a {
+      display: inline-block;
+      margin-top: 8px;
+      padding: 12px 20px;
+      border-radius: 10px;
+      background: oklch(55% 0.18 155);
+      color: white;
+      font-weight: 600;
+    }
+
     /* ---------- Contact ---------- */
     .contact {
       padding: 80px 40px;
@@ -651,7 +728,29 @@
     /* ---------- Responsive ---------- */
     @media (max-width: 768px) {
       nav { padding: 12px 20px; }
-      .nav-links { display: none; }
+      .nav-burger { display: flex; }
+      .nav-links {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0;
+        padding: 4px 20px 12px;
+        background: var(--surface);
+        border-bottom: 1px solid var(--neutral-200);
+        box-shadow: 0 10px 28px oklch(50% 0.01 250 / 0.14);
+      }
+      .nav-links.open { display: flex; }
+      .nav-links a {
+        display: block;
+        padding: 14px 0;
+        font-size: 0.95rem;
+        border-bottom: 1px solid var(--neutral-100);
+      }
+      .nav-links li:last-child a { border-bottom: none; }
       .hero { padding: 100px 20px 60px; }
       .hero-stats { gap: 24px; }
       .domains, .demos, .process, .contact { padding: 60px 20px; }
@@ -678,7 +777,10 @@
 
   <nav id="nav">
     <a href="#" class="nav-logo">SIDI<span>TECH</span></a>
-    <ul class="nav-links">
+    <button class="nav-burger" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="nav-links">
+      <span></span><span></span><span></span>
+    </button>
+    <ul class="nav-links" id="nav-links">
       <li><a href="#demos" data-fr="Démos" data-ar="العروض">Démos</a></li>
       <li><a href="#process" data-fr="Processus" data-ar="المنهجية">Processus</a></li>
       <li><a href="#devis" data-fr="Devis" data-ar="طلب عرض">Devis</a></li>
@@ -739,7 +841,7 @@
   <section class="demos" id="demos">
     <div class="section-label" data-fr="Démos interactives" data-ar="العروض التفاعلية">Démos interactives</div>
     <h2 class="section-title" data-fr="Essayez avant de commander" data-ar="جرّب قبل أن تطلب">Essayez avant de commander</h2>
-    <p class="section-desc" data-fr="Pas de screenshots statiques. Cliquez, testez, explorez mes solutions en conditions réelles." data-ar="لا صور ثابتة. انقر، جرّب، واستكشف حلولي في ظروف حقيقية.">Pas de screenshots statiques. Cliquez, testez, explorez mes solutions en conditions réelles.</p>
+    <p class="section-desc" data-fr="Une démo live réellement cliquable, et une fiche détaillée par solution. Filtres, KPI et export CSV fonctionnent pour de vrai." data-ar="عرض تجريبي حي قابل للنقر فعلاً، وورقة تفصيلية لكل حل. المرشحات والمؤشرات والتصدير تعمل حقاً.">Une démo live réellement cliquable, et une fiche détaillée par solution. Filtres, KPI et export CSV fonctionnent pour de vrai.</p>
 
     <div class="demos-grid">
       <!-- Démo 1 : SaaS ONG -->
@@ -763,7 +865,7 @@
             <span class="demo-tag">Node.js</span>
             <span class="demo-tag">KoboToolbox</span>
           </div>
-          <a href="ong.html" class="demo-cta" data-fr="Essayer la démo →" data-ar="← جرّب العرض">Essayer la démo →</a>
+          <a href="demo-beneficiaires.html" class="demo-cta demo-cta-live" data-fr="▶ Essayer la démo live →" data-ar="▶ جرّب العرض الحي ←">▶ Essayer la démo live →</a>
         </div>
       </div>
 
@@ -788,7 +890,7 @@
             <span class="demo-tag">Tailwind</span>
             <span class="demo-tag">PDF</span>
           </div>
-          <a href="dashboard.html" class="demo-cta" data-fr="Essayer la démo →" data-ar="← جرّب العرض">Essayer la démo →</a>
+          <a href="dashboard.html" class="demo-cta" data-fr="Voir la fiche →" data-ar="عرض الورقة ←">Voir la fiche →</a>
         </div>
       </div>
 
@@ -813,7 +915,7 @@
             <span class="demo-tag">Node.js</span>
             <span class="demo-tag">SMS API</span>
           </div>
-          <a href="school.html" class="demo-cta" data-fr="Essayer la démo →" data-ar="← جرّب العرض">Essayer la démo →</a>
+          <a href="school.html" class="demo-cta" data-fr="Voir la fiche →" data-ar="عرض الورقة ←">Voir la fiche →</a>
         </div>
       </div>
 
@@ -838,7 +940,7 @@
             <span class="demo-tag">PostgreSQL</span>
             <span class="demo-tag">PDF</span>
           </div>
-          <a href="erp.html" class="demo-cta" data-fr="Essayer la démo →" data-ar="← جرّب العرض">Essayer la démo →</a>
+          <a href="erp.html" class="demo-cta" data-fr="Voir la fiche →" data-ar="عرض الورقة ←">Voir la fiche →</a>
         </div>
       </div>
     </div>
@@ -900,27 +1002,27 @@
       <form class="quote-form" onsubmit="handleSubmit(event)">
         <div class="form-row">
           <div class="form-group">
-            <label data-fr="Nom complet" data-ar="الاسم الكامل">Nom complet</label>
-            <input type="text" name="name" required>
+            <label for="f-name" data-fr="Nom complet" data-ar="الاسم الكامل">Nom complet</label>
+            <input type="text" id="f-name" name="name" autocomplete="name" required>
           </div>
           <div class="form-group">
-            <label data-fr="Organisation" data-ar="المؤسسة">Organisation</label>
-            <input type="text" name="org">
+            <label for="f-org" data-fr="Organisation" data-ar="المؤسسة">Organisation</label>
+            <input type="text" id="f-org" name="org" autocomplete="organization">
           </div>
         </div>
         <div class="form-row">
           <div class="form-group">
-            <label data-fr="Email" data-ar="البريد الإلكتروني">Email</label>
-            <input type="email" name="email" required>
+            <label for="f-email" data-fr="Email" data-ar="البريد الإلكتروني">Email</label>
+            <input type="email" id="f-email" name="email" autocomplete="email" required>
           </div>
           <div class="form-group">
-            <label data-fr="WhatsApp" data-ar="واتساب">WhatsApp</label>
-            <input type="tel" name="phone" placeholder="+222...">
+            <label for="f-phone" data-fr="WhatsApp" data-ar="واتساب">WhatsApp</label>
+            <input type="tel" id="f-phone" name="phone" autocomplete="tel" placeholder="+222...">
           </div>
         </div>
         <div class="form-group">
-          <label data-fr="Type de projet" data-ar="نوع المشروع">Type de projet</label>
-          <select name="type" required>
+          <label for="f-type" data-fr="Type de projet" data-ar="نوع المشروع">Type de projet</label>
+          <select id="f-type" name="type" required>
             <option value="" data-fr="Choisir..." data-ar="اختر...">Choisir...</option>
             <option value="saas" data-fr="Plateforme SaaS" data-ar="منصة SaaS">Plateforme SaaS</option>
             <option value="dashboard" data-fr="Dashboard / Reporting" data-ar="لوحة تحكم / تقارير">Dashboard / Reporting</option>
@@ -932,10 +1034,11 @@
           </select>
         </div>
         <div class="form-group">
-          <label data-fr="Décrivez votre besoin" data-ar="صِف احتياجك">Décrivez votre besoin</label>
-          <textarea name="description" required></textarea>
+          <label for="f-desc" data-fr="Décrivez votre besoin" data-ar="صِف احتياجك">Décrivez votre besoin</label>
+          <textarea id="f-desc" name="description" required></textarea>
         </div>
         <button type="submit" class="form-submit" data-fr="Envoyer la demande →" data-ar="← إرسال الطلب">Envoyer la demande →</button>
+        <p class="form-status" id="form-status" role="status" aria-live="polite"></p>
       </form>
     </div>
   </section>
@@ -963,6 +1066,22 @@
     const nav = document.getElementById('nav');
     window.addEventListener('scroll', () => nav.classList.toggle('scrolled', window.scrollY > 20));
 
+    // Menu burger mobile
+    const burger = document.querySelector('.nav-burger');
+    const navLinks = document.getElementById('nav-links');
+    function closeMenu() {
+      navLinks.classList.remove('open');
+      burger.setAttribute('aria-expanded', 'false');
+    }
+    burger.addEventListener('click', () => {
+      const open = navLinks.classList.toggle('open');
+      burger.setAttribute('aria-expanded', String(open));
+    });
+    // Referme le menu apres un clic sur un lien ou sur Echap
+    navLinks.addEventListener('click', e => { if (e.target.closest('a')) closeMenu(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMenu(); });
+    window.addEventListener('resize', () => { if (window.innerWidth > 768) closeMenu(); });
+
     // Bascule FR / AR (avec inversion RTL)
     function setLang(lang) {
       const html = document.documentElement;
@@ -987,9 +1106,46 @@
     function handleSubmit(e) {
       e.preventDefault();
       const form = e.target;
+      const status = document.getElementById('form-status');
       const data = new FormData(form);
-      const msg = `Bonjour SIDITECH!\n\nNom: ${data.get('name')}\nOrganisation: ${data.get('org')}\nEmail: ${data.get('email')}\nType: ${data.get('type')}\n\nBesoin:\n${data.get('description')}`;
-      window.open(`https://wa.me/22222149282?text=${encodeURIComponent(msg)}`, '_blank');
+
+      // Libelle lisible du type, dans la langue active (FR ou AR)
+      const select = form.querySelector('select[name="type"]');
+      const typeLabel = select && select.selectedIndex >= 0
+        ? select.options[select.selectedIndex].text.trim()
+        : '';
+
+      const val = k => (data.get(k) || '').toString().trim();
+      const msg = [
+        'Bonjour SIDITECH !',
+        '',
+        `Nom : ${val('name')}`,
+        `Organisation : ${val('org') || '—'}`,
+        `Email : ${val('email')}`,
+        `WhatsApp : ${val('phone') || '—'}`,
+        `Type de projet : ${typeLabel}`,
+        '',
+        'Besoin :',
+        val('description')
+      ].join('\n');
+
+      const url = `https://wa.me/22222149282?text=${encodeURIComponent(msg)}`;
+      const win = window.open(url, '_blank');
+
+      if (win) {
+        status.className = 'form-status ok';
+        status.innerHTML = '✓ WhatsApp ouvert dans un nouvel onglet. Si rien ne se passe, autorisez les pop-ups pour ce site.';
+      } else {
+        // Popup bloque : on ne perd pas la demande, on propose le lien.
+        status.className = 'form-status warn';
+        status.innerHTML = 'Votre navigateur a bloque la fenetre. Cliquez ci-dessous pour envoyer votre demande — rien n\'est perdu :';
+        const link = document.createElement('a');
+        link.href = url;
+        link.target = '_blank';
+        link.rel = 'noopener';
+        link.textContent = 'Ouvrir WhatsApp avec ma demande';
+        status.appendChild(link);
+      }
     }
 
     // Apparition au scroll
